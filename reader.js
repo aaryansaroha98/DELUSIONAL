@@ -104,7 +104,7 @@
     availW = Math.max(availW, 220);
 
     let w = availW / 2;
-    const availH = full ? (window.innerHeight - 150) : Math.min(window.innerHeight * 0.82, 760);
+    const availH = full ? (window.innerHeight - 150) : Math.min(window.innerHeight * 0.9, 1000);
     let h = w * aspect;
     if (h > availH) { h = availH; w = h / aspect; }
     w *= zoom; h *= zoom;

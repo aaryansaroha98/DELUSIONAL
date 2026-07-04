@@ -190,7 +190,7 @@ strong{font-weight:700}
 .read{background:var(--paper-2)}
 .reader-cta{display:flex;flex-wrap:wrap;gap:.85rem;justify-content:center;margin:2rem 0 2.5rem}
 .reader{
-  max-width:1000px;margin:0 auto;background:var(--paper);
+  max-width:1280px;margin:0 auto;background:var(--paper);
   border:1px solid var(--line);border-radius:var(--radius);
   overflow:hidden;box-shadow:var(--shadow);
 }
@@ -211,7 +211,7 @@ strong{font-weight:700}
 
 .reader-stage{
   position:relative;display:flex;align-items:safe center;justify-content:safe center;
-  gap:clamp(.5rem,2vw,1.5rem);padding:clamp(1.2rem,3.5vw,2.5rem);
+  gap:clamp(.3rem,1vw,.7rem);padding:clamp(.8rem,1.6vw,1.3rem) clamp(1rem,2vw,1.6rem);
   background:var(--paper-2);flex:1;perspective:2400px;overflow:auto;
 }
 .reader:fullscreen .reader-stage{background:#12110f}
