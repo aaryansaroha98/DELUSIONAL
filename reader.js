@@ -1,6 +1,6 @@
 /* ===================================================================
    DELUSIONAL — book reader
-   Desktop (> 820px): two-page open spread with a 3D page-turn.
+   Desktop (> 820px): single centered page with a 3D page-turn.
    Mobile  (<=820px): continuous vertical scroll reading.
    Page number is an editable jump box in both modes.
    Built on PDF.js.
@@ -40,12 +40,9 @@
   const isMobile = () => window.matchMedia('(max-width: 820px)').matches;
   const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* spread 0 = [—, 1] (cover on the right); spread s = [2s, 2s+1] */
-  let spread = 0;
-  const spreadPages = (s) => (s <= 0 ? { L: null, R: 1 } : { L: 2 * s, R: 2 * s + 1 });
-  const maxSpread = () => Math.floor(N / 2);
-  const spreadForPage = (p) => (p <= 1 ? 0 : Math.min(Math.floor(p / 2), maxSpread()));
-  const curSpreadPage = () => { const { L, R } = spreadPages(spread); return (R && R <= N) ? R : (L || 1); };
+  /* desktop shows one page at a time, dead-centered */
+  let page = 1;
+  const clampPage = (p) => Math.max(1, Math.min(N, p | 0));
 
   /* ============================================================
      Rendering
@@ -72,13 +69,13 @@
   function setPageInput(n) { if (document.activeElement !== pageNum) pageNum.value = n; }
 
   function jumpToPage(n) {
-    n = Math.max(1, Math.min(N, n | 0));
+    n = clampPage(n);
     if (isMobile()) {
       const c = scrollSlots[n - 1];
       if (c) scrollView.scrollTo({ top: c.offsetTop - 4, behavior: reduceMotion() ? 'auto' : 'smooth' });
     } else {
-      spread = spreadForPage(n);
-      paintSpread();
+      page = n;
+      paintPage();
     }
   }
 
@@ -87,23 +84,23 @@
     if (isNaN(v)) { setPageInput(currentPage()); return; }
     jumpToPage(v);
   }
-  const currentPage = () => (isMobile() ? scrollCurrent : curSpreadPage());
+  const currentPage = () => (isMobile() ? scrollCurrent : page);
 
   pageNum.addEventListener('change', commitInput);
   pageNum.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); pageNum.blur(); } });
   pageNum.addEventListener('focus', () => pageNum.select());
 
   /* ============================================================
-     Desktop — two-page spread + 3D turn
+     Desktop — single centered page + 3D turn
      ============================================================ */
   function measure() {
     const full = !!document.fullscreenElement;
     const cs = getComputedStyle(stage);
     let availW = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    if (getComputedStyle($('prevBtn')).display !== 'none') availW -= (46 * 2 + 32);
-    availW = Math.max(availW, 220);
+    availW -= (46 * 2 + 24);                          // leave a gutter for the edge arrows
+    availW = Math.max(availW, 200);
 
-    let w = availW / 2;
+    let w = availW;
     const availH = full ? (window.innerHeight - 150) : Math.min(window.innerHeight * 0.82, 760);
     let h = w * aspect;
     if (h > availH) { h = availH; w = h / aspect; }
@@ -111,47 +108,26 @@
     pageW = Math.max(Math.floor(w), 80);
     pageH = Math.max(Math.floor(h), 80);
 
-    book.classList.remove('single');
-    book.style.width = (2 * pageW) + 'px';
+    book.style.width = pageW + 'px';
     book.style.height = pageH + 'px';
-    leafLeft.style.display = 'block';
-    leafLeft.style.width = pageW + 'px';  leafLeft.style.height = pageH + 'px';  leafLeft.style.left = '0px';
-    leafRight.style.width = pageW + 'px'; leafRight.style.height = pageH + 'px';  leafRight.style.left = pageW + 'px';
-    layoutLeaves();
-  }
-
-  /* Center a single visible page (cover or trailing odd page) by shifting the
-     spread and hiding the empty leaf — so it sits dead-center, not off to one side. */
-  function layoutLeaves() {
-    const { L, R } = spreadPages(spread);
-    const rL = !!L && L >= 1 && L <= N;
-    const rR = !!R && R <= N;
-    book.style.transform = '';
-    leafLeft.style.visibility = 'visible';
-    leafRight.style.visibility = 'visible';
-    book.classList.toggle('single', !(rL && rR));
-    if (rR && !rL) {                 // cover: only the right page is real
-      book.style.transform = 'translateX(' + (-pageW / 2) + 'px)';
-      leafLeft.style.visibility = 'hidden';
-    } else if (rL && !rR) {          // trailing odd page: only the left page is real
-      book.style.transform = 'translateX(' + (pageW / 2) + 'px)';
-      leafRight.style.visibility = 'hidden';
-    }
+    leafLeft.style.display = 'none';
+    leafRight.style.display = 'block';
+    leafRight.style.width = pageW + 'px'; leafRight.style.height = pageH + 'px'; leafRight.style.left = '0px';
   }
 
   function updateArrows() {
-    const atStart = spread <= 0, atEnd = spread >= maxSpread();
+    const atStart = page <= 1, atEnd = page >= N;
     ['prevBtn', 'prevBtn2'].forEach(id => $(id).disabled = atStart);
     ['nextBtn', 'nextBtn2'].forEach(id => $(id).disabled = atEnd);
   }
 
-  async function paintSpread() {
+  async function paintPage() {
     measure();
     flip.style.display = 'none';
-    const { L, R } = spreadPages(spread);
-    await Promise.all([renderPage(cvLeft, L, pageW, pageH), renderPage(cvRight, R, pageW, pageH)]);
-    setPageInput(curSpreadPage()); updateArrows();
+    await renderPage(cvRight, page, pageW, pageH);
+    setPageInput(page); updateArrows();
     loading.classList.add('hidden');
+    requestAnimationFrame(centerStage);
   }
 
   function afterTransition(node, cb) {
@@ -160,54 +136,43 @@
     node.addEventListener('transitionend', h);
     setTimeout(h, 950);
   }
-  function placeFlip(side) {
-    flip.style.width = pageW + 'px'; flip.style.height = pageH + 'px';
-    if (side === 'right') { flip.style.left = pageW + 'px'; flip.style.transformOrigin = '0% 50%'; }
-    else { flip.style.left = '0px'; flip.style.transformOrigin = '100% 50%'; }
-  }
-  async function runTurn(o) {
+
+  async function runTurn(dir) {                       // dir = +1 next, -1 prev
     animating = true;
-    placeFlip(o.side);
-    await Promise.all([renderPage(cvFront, o.frontNum, pageW, pageH), renderPage(cvBack, o.backNum, pageW, pageH)]);
+    const target = page + dir;
+    flip.style.width = pageW + 'px'; flip.style.height = pageH + 'px'; flip.style.left = '0px';
+    flip.style.transformOrigin = dir > 0 ? '0% 50%' : '100% 50%';
+    const toDeg = dir > 0 ? -180 : 180;
+
+    await Promise.all([renderPage(cvFront, page, pageW, pageH), renderPage(cvBack, target, pageW, pageH)]);
     flip.style.display = 'block';
     flip.classList.remove('animating');
-    flip.style.transform = 'rotateY(' + o.fromDeg + 'deg)';
+    flip.style.transform = 'rotateY(0deg)';
     void flip.offsetWidth;
-    if (o.under) await o.under();
+    await renderPage(cvRight, target, pageW, pageH);  // reveal target underneath
     void flip.offsetWidth;
     flip.classList.add('animating');
-    flip.style.transform = 'rotateY(' + o.toDeg + 'deg)';
-    afterTransition(flip, async () => {
-      await o.commit();
+    flip.style.transform = 'rotateY(' + toDeg + 'deg)';
+    afterTransition(flip, () => {
+      page = target;
       flip.classList.remove('animating');
       flip.style.display = 'none';
       animating = false;
-      layoutLeaves();
-      setPageInput(curSpreadPage()); updateArrows();
+      setPageInput(page); updateArrows();
     });
   }
 
   function next() {
     if (!pdf || isMobile()) { if (isMobile()) jumpToPage(scrollCurrent + 1); return; }
-    if (animating || spread >= maxSpread()) return;
-    if (reduceMotion()) { spread += 1; paintSpread(); return; }
-    const cur = spreadPages(spread), nxt = spreadPages(spread + 1);
-    runTurn({
-      side: 'right', frontNum: cur.R, backNum: nxt.L, fromDeg: 0, toDeg: -180,
-      under: () => renderPage(cvRight, nxt.R, pageW, pageH),
-      commit: async () => { spread += 1; await renderPage(cvLeft, nxt.L, pageW, pageH); }
-    });
+    if (animating || page >= N) return;
+    if (reduceMotion()) { page += 1; paintPage(); return; }
+    runTurn(1);
   }
   function prev() {
     if (!pdf || isMobile()) { if (isMobile()) jumpToPage(scrollCurrent - 1); return; }
-    if (animating || spread <= 0) return;
-    if (reduceMotion()) { spread -= 1; paintSpread(); return; }
-    const cur = spreadPages(spread), prv = spreadPages(spread - 1);
-    runTurn({
-      side: 'left', frontNum: cur.L, backNum: prv.R, fromDeg: 0, toDeg: 180,
-      under: () => renderPage(cvLeft, prv.L, pageW, pageH),
-      commit: async () => { spread -= 1; await renderPage(cvRight, prv.R, pageW, pageH); }
-    });
+    if (animating || page <= 1) return;
+    if (reduceMotion()) { page -= 1; paintPage(); return; }
+    runTurn(-1);
   }
 
   /* ============================================================
@@ -286,8 +251,8 @@
       buildScroll();
       requestAnimationFrame(() => { jumpToPage(keepPage); onScroll(); });
     } else {
-      spread = spreadForPage(keepPage);
-      paintSpread();
+      page = clampPage(keepPage);
+      paintPage();
     }
     wasMobile = mob;
   }
@@ -323,8 +288,8 @@
   });
   document.addEventListener('fullscreenchange', reflow);
 
-  /* keep the enlarged spread centred so zoom grows from the middle,
-     then the user can pan left/right to read each cropped page */
+  /* keep the enlarged page centred so zoom grows from the middle,
+     then the user can pan to read the cropped edges */
   function centerStage() {
     if (isMobile()) return;
     stage.scrollLeft = Math.max(0, (stage.scrollWidth - stage.clientWidth) / 2);
@@ -335,10 +300,10 @@
     if (!pdf) return;
     const keep = currentPage();
     if (isMobile()) applyMode(keep);
-    else if (!animating) { paintSpread(); requestAnimationFrame(centerStage); }
+    else if (!animating) paintPage();
   }
 
-  // keyboard — desktop spread only (mobile uses native scroll)
+  // keyboard — desktop only (mobile uses native scroll)
   let inView = false;
   new IntersectionObserver(es => es.forEach(e => (inView = e.isIntersecting)), { threshold: 0.2 }).observe(reader);
   window.addEventListener('keydown', (e) => {
@@ -348,7 +313,7 @@
     if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
   });
 
-  // swipe — desktop spread only
+  // swipe — desktop only
   let sx = null, sy = null;
   stage.addEventListener('touchstart', (e) => { if (isMobile()) return; sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
   stage.addEventListener('touchend', (e) => {
@@ -367,7 +332,7 @@
       const keep = currentPage();
       if (isMobile() !== wasMobile) applyMode(keep);
       else if (isMobile()) applyMode(keep);   // re-fit scroll widths
-      else if (!animating) paintSpread();
+      else if (!animating) paintPage();
     }, 180);
   });
 })();
