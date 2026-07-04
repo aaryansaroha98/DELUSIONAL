@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m http.server 5173)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/index.html)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/reader.js)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"http://localhost:5173/Public/DELUSIONAL.pdf\")",
+      "Bash(node --check reader.js)",
+      "Bash(command -v pdftoppm mutool sips magick convert gs)",
+      "Bash(sw_vers -productVersion)",
+      "Bash(python3 -c \"import Quartz; print\\('Quartz OK'\\)\")",
+      "Bash(sips -s format png Public/DELUSIONAL_full_cover_light.pdf --out /tmp/cover_full.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/cover_full.png)",
+      "Read(//tmp/**)",
+      "Read(//private/tmp/**)",
+      "Bash(sips -s format png -Z 2400 Public/DELUSIONAL_full_cover_light.pdf --out /tmp/cover_hi.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/cover_hi.png)",
+      "Bash(cp /tmp/cover_hi.png /tmp/front.png)",
+      "Bash(sips --cropOffset 0 1225 -c 1780 1175 /tmp/front.png)",
+      "Bash(sips -g pixelWidth -g pixelHeight /tmp/front.png)",
+      "Bash(cd \"/Users/aaryansaroha/Documents/Projects/DELUSIONAL WEB\" && cp /tmp/front.png Public/cover-front.png && ls -la Public/cover-front.png)",
+      "Bash(gh auth *)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git add *)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp"
+    ]
+  }
+}
