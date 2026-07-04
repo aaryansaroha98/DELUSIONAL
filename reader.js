@@ -100,23 +100,23 @@
     const full = !!document.fullscreenElement;
     const cs = getComputedStyle(stage);
     const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
-    const gutter = (getComputedStyle($('prevBtn')).display !== 'none') ? (46 * 2 + 24) : 0;
 
-    /* height-driven: pick a page height, derive width, then make the frame hug the book */
+    /* height-driven: pick a page height, derive width, then make the frame hug the book.
+       Arrows live OUTSIDE the frame, so no gutter is reserved inside. */
     const availH = full ? (window.innerHeight - 150) : Math.min(window.innerHeight * 0.56, 520);
-    const maxBookW = Math.min(window.innerWidth - 40, 1360);   // never overflow the viewport
+    const maxBookW = Math.min(window.innerWidth - 180, 1200);   // leave room for outside arrows
 
     let h = availH;
     let w = h / aspect;                                        // one page width
-    let bookW = 2 * w + gutter + padX;
+    let bookW = 2 * w + padX;
     if (bookW > maxBookW) { const s = maxBookW / bookW; h *= s; w = h / aspect; }
 
     w *= zoom; h *= zoom;
     pageW = Math.max(Math.floor(w), 80);
     pageH = Math.max(Math.floor(h), 80);
 
-    /* size the reader card to exactly wrap the book (a touch more), unless zoomed/fullscreen */
-    if (!full && zoom <= 1.001) reader.style.width = Math.round(2 * pageW + gutter + padX) + 'px';
+    /* size the reader card to exactly wrap the book, unless zoomed/fullscreen */
+    if (!full && zoom <= 1.001) reader.style.width = Math.round(2 * pageW + padX) + 'px';
     else reader.style.width = '';
 
     book.classList.remove('single');
