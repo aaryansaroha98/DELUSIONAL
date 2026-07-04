@@ -28,7 +28,8 @@
       "Bash(git commit -q -m 'Reader: center single cover/last page; move arrows to frame edges *)",
       "Bash(git commit -q -m 'Reader: desktop shows one centered page instead of two-page spread *)",
       "Bash(git commit -q -m 'Reader: restore two-page open-book spread on desktop *)",
-      "Bash(git commit -q -m 'Reader: enlarge book to fill view area \\(wider frame, taller pages\\) *)"
+      "Bash(git commit -q -m 'Reader: enlarge book to fill view area \\(wider frame, taller pages\\) *)",
+      "Bash(git commit -q -m 'Reader: shorter pages, frame sized to hug the two-page book *)"
     ],
     "additionalDirectories": [
       "/private/tmp"

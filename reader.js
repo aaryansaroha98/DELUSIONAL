@@ -99,17 +99,25 @@
   function measure() {
     const full = !!document.fullscreenElement;
     const cs = getComputedStyle(stage);
-    let availW = stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-    if (getComputedStyle($('prevBtn')).display !== 'none') availW -= (46 * 2 + 32);
-    availW = Math.max(availW, 220);
+    const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+    const gutter = (getComputedStyle($('prevBtn')).display !== 'none') ? (46 * 2 + 24) : 0;
 
-    let w = availW / 2;
-    const availH = full ? (window.innerHeight - 150) : Math.min(window.innerHeight * 0.9, 1000);
-    let h = w * aspect;
-    if (h > availH) { h = availH; w = h / aspect; }
+    /* height-driven: pick a page height, derive width, then make the frame hug the book */
+    const availH = full ? (window.innerHeight - 150) : Math.min(window.innerHeight * 0.66, 620);
+    const maxBookW = Math.min(window.innerWidth - 40, 1360);   // never overflow the viewport
+
+    let h = availH;
+    let w = h / aspect;                                        // one page width
+    let bookW = 2 * w + gutter + padX;
+    if (bookW > maxBookW) { const s = maxBookW / bookW; h *= s; w = h / aspect; }
+
     w *= zoom; h *= zoom;
     pageW = Math.max(Math.floor(w), 80);
     pageH = Math.max(Math.floor(h), 80);
+
+    /* size the reader card to exactly wrap the book (a touch more), unless zoomed/fullscreen */
+    if (!full && zoom <= 1.001) reader.style.width = Math.round(2 * pageW + gutter + padX) + 'px';
+    else reader.style.width = '';
 
     book.classList.remove('single');
     book.style.width = (2 * pageW) + 'px';
@@ -283,6 +291,7 @@
     scrollView.hidden = !mob;
 
     if (mob) {
+      reader.style.width = '';
       buildScroll();
       requestAnimationFrame(() => { jumpToPage(keepPage); onScroll(); });
     } else {
