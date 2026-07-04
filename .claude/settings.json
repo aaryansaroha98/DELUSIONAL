@@ -26,7 +26,8 @@
       "Bash(git commit -q -m 'Book reader site: real cover image, centered zoom-pan reader *)",
       "Bash(git push *)",
       "Bash(git commit -q -m 'Reader: center single cover/last page; move arrows to frame edges *)",
-      "Bash(git commit -q -m 'Reader: desktop shows one centered page instead of two-page spread *)"
+      "Bash(git commit -q -m 'Reader: desktop shows one centered page instead of two-page spread *)",
+      "Bash(git commit -q -m 'Reader: restore two-page open-book spread on desktop *)"
     ],
     "additionalDirectories": [
       "/private/tmp"
