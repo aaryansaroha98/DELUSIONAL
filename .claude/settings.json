@@ -32,7 +32,8 @@
       "Bash(git commit -q -m 'Reader: shorter pages, frame sized to hug the two-page book *)",
       "WebFetch(domain:a.co)",
       "Bash(git commit -q -m 'Shorten reader height; add Amazon paperback links \\(hero, nav, read, footer\\) *)",
-      "Bash(git commit -q -m 'Reader: frame hugs & centers book; arrows outside frame, always visible *)"
+      "Bash(git commit -q -m 'Reader: frame hugs & centers book; arrows outside frame, always visible *)",
+      "Bash(git commit -q -m 'Reader: push nav arrows further outside the frame \\(-84px\\) *)"
     ],
     "additionalDirectories": [
       "/private/tmp"

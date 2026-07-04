@@ -256,8 +256,8 @@ strong{font-weight:700}
 }
 /* desktop: arrows sit OUTSIDE the reader frame, in the side margins */
 .reader > .page-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:30}
-.reader > .page-nav.prev{left:-64px}
-.reader > .page-nav.next{right:-64px}
+.reader > .page-nav.prev{left:-84px}
+.reader > .page-nav.next{right:-84px}
 .reader.zoomed > .page-nav.prev{left:8px}
 .reader.zoomed > .page-nav.next{right:8px}
 .reader:fullscreen > .page-nav.prev{left:18px}
