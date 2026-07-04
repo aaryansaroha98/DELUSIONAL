@@ -197,7 +197,7 @@ strong{font-weight:700}
 .reader:fullscreen{max-width:none;width:100%;height:100%;border-radius:0;display:flex;flex-direction:column}
 .reader-bar{
   display:flex;align-items:center;justify-content:space-between;gap:.5rem;
-  padding:.7rem 1.1rem;border-bottom:1px solid var(--line);background:var(--paper);
+  padding:.5rem 1.1rem;border-bottom:1px solid var(--line);background:var(--paper);
 }
 .reader-file{font-family:'Archivo',sans-serif;font-weight:700;letter-spacing:.02em;font-size:.82rem;color:var(--ink-soft)}
 .reader-tools{display:flex;gap:.4rem}
@@ -276,7 +276,7 @@ strong{font-weight:700}
 
 .reader-foot{
   display:flex;align-items:center;justify-content:center;gap:1.5rem;
-  padding:.75rem 1rem;border-top:1px solid var(--line);background:var(--paper);
+  padding:.5rem 1rem;border-top:1px solid var(--line);background:var(--paper);
 }
 .page-jump{display:inline-flex;align-items:center;gap:.4rem;font-family:'Archivo',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:.04em;color:var(--ink)}
 .page-input{
