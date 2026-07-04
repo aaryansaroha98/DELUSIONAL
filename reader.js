@@ -117,6 +117,26 @@
     leafLeft.style.display = 'block';
     leafLeft.style.width = pageW + 'px';  leafLeft.style.height = pageH + 'px';  leafLeft.style.left = '0px';
     leafRight.style.width = pageW + 'px'; leafRight.style.height = pageH + 'px';  leafRight.style.left = pageW + 'px';
+    layoutLeaves();
+  }
+
+  /* Center a single visible page (cover or trailing odd page) by shifting the
+     spread and hiding the empty leaf — so it sits dead-center, not off to one side. */
+  function layoutLeaves() {
+    const { L, R } = spreadPages(spread);
+    const rL = !!L && L >= 1 && L <= N;
+    const rR = !!R && R <= N;
+    book.style.transform = '';
+    leafLeft.style.visibility = 'visible';
+    leafRight.style.visibility = 'visible';
+    book.classList.toggle('single', !(rL && rR));
+    if (rR && !rL) {                 // cover: only the right page is real
+      book.style.transform = 'translateX(' + (-pageW / 2) + 'px)';
+      leafLeft.style.visibility = 'hidden';
+    } else if (rL && !rR) {          // trailing odd page: only the left page is real
+      book.style.transform = 'translateX(' + (pageW / 2) + 'px)';
+      leafRight.style.visibility = 'hidden';
+    }
   }
 
   function updateArrows() {
@@ -162,6 +182,7 @@
       flip.classList.remove('animating');
       flip.style.display = 'none';
       animating = false;
+      layoutLeaves();
       setPageInput(curSpreadPage()); updateArrows();
     });
   }

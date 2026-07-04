@@ -22,7 +22,10 @@
       "Bash(gh auth *)",
       "Bash(git init *)",
       "Bash(git remote *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -q -m 'Book reader site: real cover image, centered zoom-pan reader *)",
+      "Bash(git push *)",
+      "Bash(git commit -q -m 'Reader: center single cover/last page; move arrows to frame edges *)"
     ],
     "additionalDirectories": [
       "/private/tmp"
